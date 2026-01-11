@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -27,7 +26,13 @@ public class PublicService {
     }
 
     public String save(LongUrlDto longUrlDto) {
-        try{
+            if(!longUrlDto.getLongUrl().startsWith("http://") && !longUrlDto.getLongUrl().startsWith("https://")){
+                longUrlDto.setLongUrl("https://"+longUrlDto.getLongUrl());
+            }
+            Optional<UrlData> data=checkifexist(longUrlDto);
+            if(data.isPresent()){
+                return data.get().getShortURL();
+            }
             UrlData urlData=new UrlData();
             urlData.setLongURL(longUrlDto.getLongUrl());
             urlData=databaseRepository.save(urlData);
@@ -35,17 +40,11 @@ public class PublicService {
             urlData.setShortURL(shortUrl);
             databaseRepository.save(urlData);
             return shortUrl;
-        } catch (Exception e) {
-            log.error("Error While Saving new data or finding Data"+e.getMessage());
-            return "Please Try Again";
         }
 
 
-    }
-
-
-    public Optional<String> checkifexist(LongUrlDto longUrlDto) {
-        return null;
+    public Optional<UrlData> checkifexist(LongUrlDto longUrlDto) {
+        return databaseRepository.findByLongURL(longUrlDto.getLongUrl());
     }
 
     public ResponseEntity<?> redirect(String shortUrl) {

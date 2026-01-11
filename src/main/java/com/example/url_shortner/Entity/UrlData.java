@@ -4,11 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(
-        name="url_data",
-        indexes = {
-                @Index(name = "idx_short_url", columnList = "shortURL")
-      })
+@Table(name="url_data")
 @Data
 public class UrlData {
 
