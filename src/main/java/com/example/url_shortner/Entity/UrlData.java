@@ -17,4 +17,7 @@ public class UrlData {
 
     @Column(unique = true, nullable = false)
     private String longURL;
+
+    @ManyToOne
+    private User user;
 }
