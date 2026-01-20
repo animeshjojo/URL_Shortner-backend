@@ -5,23 +5,29 @@ import com.example.url_shortner.Dto.ShortUrlDto;
 import com.example.url_shortner.Dto.UserLoginDto;
 import com.example.url_shortner.Entity.User;
 import com.example.url_shortner.Services.PublicService;
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
+import com.example.url_shortner.Utility.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password4j.BcryptPassword4jPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
+@Slf4j
 public class PublicController {
 
    private PublicService publicService;
    private BcryptPassword4jPasswordEncoder passwordEncoder;
+   private AuthenticationManager authenticationManager;
+   private JwtUtil jwtUtil;
 
-   public PublicController(PublicService publicService) {
+   public PublicController(PublicService publicService,AuthenticationManager authenticationManager) {
        this.publicService = publicService;
        this.passwordEncoder = new BcryptPassword4jPasswordEncoder();
+       this.authenticationManager=authenticationManager;
    }
 
    @PostMapping
@@ -37,7 +43,6 @@ public class PublicController {
        catch(Exception e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please Try again");
        }
-
    }
 
    @GetMapping("/{shortUrl}")
@@ -66,5 +71,17 @@ public class PublicController {
        }
    }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginDto userdto){
+        try{
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userdto.getUserName(), userdto.getPassword()));
+            String jwt = jwtUtil.generateToken(userdto.getUserName());
+            return new ResponseEntity<>(jwt, HttpStatus.OK);
+        }catch (Exception e){
+            log.error("Exception occurred while createAuthenticationToken ", e);
+            return new ResponseEntity<>("Incorrect username or password", HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }
