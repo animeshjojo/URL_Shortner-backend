@@ -2,7 +2,7 @@ package com.example.url_shortner.Services;
 
 import com.example.url_shortner.Dto.LongUrlDto;
 import com.example.url_shortner.Entity.UrlData;
-import com.example.url_shortner.Repository.DatabaseRepository;
+import com.example.url_shortner.Repository.UrlRepository;
 import com.example.url_shortner.Utility.Base62EncoderWithSecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,12 +16,12 @@ import java.util.Optional;
 @Slf4j
 public class PublicService {
 
-    private DatabaseRepository databaseRepository;
+    private UrlRepository urlRepository;
 
     private Base62EncoderWithSecretKey base62EncoderWithSecretKey;
 
-    public PublicService(DatabaseRepository databaseRepository, Base62EncoderWithSecretKey base62EncoderWithSecretKey) {
-        this.databaseRepository = databaseRepository;
+    public PublicService(UrlRepository urlRepository, Base62EncoderWithSecretKey base62EncoderWithSecretKey) {
+        this.urlRepository = urlRepository;
         this.base62EncoderWithSecretKey = base62EncoderWithSecretKey;
     }
 
@@ -35,21 +35,21 @@ public class PublicService {
             }
             UrlData urlData=new UrlData();
             urlData.setLongURL(longUrlDto.getLongUrl());
-            urlData=databaseRepository.save(urlData);
+            urlData= urlRepository.save(urlData);
             String shortUrl=base62EncoderWithSecretKey.encode(urlData.getId());
             urlData.setShortURL(shortUrl);
-            databaseRepository.save(urlData);
+            urlRepository.save(urlData);
             return shortUrl;
         }
 
 
     public Optional<UrlData> checkifexist(LongUrlDto longUrlDto) {
-        return databaseRepository.findByLongURL(longUrlDto.getLongUrl());
+        return urlRepository.findByLongURL(longUrlDto.getLongUrl());
     }
 
     public ResponseEntity<String> redirect(String shortUrl) {
         long id=base62EncoderWithSecretKey.decode(shortUrl);
-        UrlData urlData=databaseRepository.findById(id).orElse(null);
+        UrlData urlData= urlRepository.findById(id).orElse(null);
         if(urlData==null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid ShortUrl");
         }

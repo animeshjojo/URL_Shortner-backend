@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 
-public interface DatabaseRepository extends JpaRepository<UrlData,Long> {
+public interface UrlRepository extends JpaRepository<UrlData,Long> {
     Optional<UrlData> findByLongURL(String longURL);
 }
