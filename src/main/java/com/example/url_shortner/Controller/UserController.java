@@ -3,6 +3,7 @@ package com.example.url_shortner.Controller;
 import com.example.url_shortner.Dto.LongUrlDto;
 import com.example.url_shortner.Dto.ShortUrlDto;
 import com.example.url_shortner.Entity.UrlData;
+import com.example.url_shortner.Entity.User;
 import com.example.url_shortner.Services.PublicService;
 import com.example.url_shortner.Services.UserService;
 import org.springframework.http.HttpStatus;
@@ -23,14 +24,29 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UrlData>  getUrlData(){
-        String username= SecurityContextHolder.getContext().getAuthentication().getName();
-        return userService.getUrlDataByUser(username);
+    public ResponseEntity<?>  getUrlData(){
+        List<UrlData> data=userService.getUrlData();
+        if(data.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else{
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        }
     }
 
     @PostMapping
     public ResponseEntity<?> saveData(@RequestBody LongUrlDto longUrlDto) {
-       return userService.getShortUrlByUrl(longUrlDto);
+        try{
+            if(longUrlDto.getLongUrl()==null || longUrlDto.getLongUrl().isEmpty()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("LongUrl is empty");
+            }
+            ShortUrlDto shortUrlDto = new ShortUrlDto();
+            shortUrlDto.setShortUrl("http://localhost:8080/"+userService.save(longUrlDto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(shortUrlDto);
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please Try again");
+        }
     }
     //post mapping where authenticated user will enter long url and will get short url and in db the list of that user will be updated
 
