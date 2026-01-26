@@ -3,6 +3,7 @@ package com.example.url_shortner.Services;
 
 import com.example.url_shortner.Dto.LongUrlDto;
 import com.example.url_shortner.Dto.ShortUrlDto;
+import com.example.url_shortner.Dto.UrlDataDto;
 import com.example.url_shortner.Dto.UserLoginDto;
 import com.example.url_shortner.Entity.UrlData;
 import com.example.url_shortner.Entity.User;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -47,7 +49,6 @@ public class UserService {
         User user = new User();
         user.setUserName(userLoginDto.getUserName());
         user.setPassword(passwordEncoder.encode(userLoginDto.getPassword()));
-        user.setRoles(Arrays.asList("User"));
         userRepositry.save(user);
     }
     public String save(LongUrlDto longUrlDto) {
@@ -69,11 +70,18 @@ public class UserService {
         return shortUrl;
     }
 
-    public List<UrlData> getUrlData(){
+    public List<UrlDataDto> getUrlData(){
         String userName=SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepositry.findUserByUserName(userName).getUrls();
+        return userRepositry.findUserByUserName(userName).getUrls().stream().map(
+              urlData -> {
+                  UrlDataDto urlDataDto=new UrlDataDto();
+                  urlDataDto.setShortURL("http://localhost:8080/"+urlData.getShortURL());
+                  urlDataDto.setLongURL(urlData.getLongURL());
+                  return urlDataDto;
+              }
+        ).collect(Collectors.toList());
     }
     //modify check if exists.
-   // if exist in db add then add user to hat url data
+   // if exist in db add then add user to that url data
 
 }

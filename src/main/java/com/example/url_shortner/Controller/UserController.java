@@ -2,6 +2,7 @@ package com.example.url_shortner.Controller;
 
 import com.example.url_shortner.Dto.LongUrlDto;
 import com.example.url_shortner.Dto.ShortUrlDto;
+import com.example.url_shortner.Dto.UrlDataDto;
 import com.example.url_shortner.Entity.UrlData;
 import com.example.url_shortner.Entity.User;
 import com.example.url_shortner.Services.PublicService;
@@ -25,7 +26,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?>  getUrlData(){
-        List<UrlData> data=userService.getUrlData();
+        List<UrlDataDto> data=userService.getUrlData();
         if(data.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -48,6 +49,5 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please Try again");
         }
     }
-    //post mapping where authenticated user will enter long url and will get short url and in db the list of that user will be updated
 
 }
