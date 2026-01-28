@@ -79,7 +79,7 @@ public class UserService {
                   urlDataDto.setLongURL(urlData.getLongURL());
                   return urlDataDto;
               }
-        ).collect(Collectors.toList());
+        ).toList();
     }
     //modify check if exists.
    // if exist in db add then add user to that url data
