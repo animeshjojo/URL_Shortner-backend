@@ -56,7 +56,7 @@ public class UserService {
             longUrlDto.setLongUrl("https://"+longUrlDto.getLongUrl());
         }
         User user=userRepositry.findUserByUserName(SecurityContextHolder.getContext().getAuthentication().getName());
-        Optional<UrlData> data=publicService.checkifexist(longUrlDto);
+        Optional<UrlData> data=checkifexist(longUrlDto,user);
         if(data.isPresent()){
             return data.get().getShortURL();
         }
@@ -81,7 +81,12 @@ public class UserService {
               }
         ).toList();
     }
-    //modify check if exists.
-   // if exist in db add then add user to that url data
+
+    public Optional<UrlData> checkifexist(LongUrlDto longUrlDto,User user) {
+
+        UrlData urlData=urlRepository.findByLongURL(longUrlDto.getLongUrl()).orElse(null);
+        urlData.setUser(user);
+        return Optional.ofNullable(urlData);
+    }
 
 }
